@@ -84,7 +84,7 @@ l  // 두 번 pop하고, 그 두 값의 arithmetic add 값을 push
                 sp                                             sp
 </code></pre>
 <pre><code>
-|  // 두 번 pop하고, 그 두 값의 logical nand 값을 push
+|  // 두 번 pop하고, 그 두 값의 bitwise nand 값을 push
     ┌────┬────┲━━━━┱────┬────┬────┐            ┌────┬────┲━━━━━━━━━━━━┱────┬────┬────┐
 ... │ aa │ bb ┃ cc ┃ dd │ ee │ ff │ ... => ... │ xx │ aa ┃ bb NAND cc ┃ dd │ ee │ ff │ ...
     └────┴────┺━━━━┹────┴────┴────┘            └────┴────┺━━━━━━━━━━━━┹────┴────┴────┘
