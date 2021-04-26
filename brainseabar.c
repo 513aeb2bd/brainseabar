@@ -189,7 +189,6 @@ i32 interpret (ui8* buffer) {
       }
 
       if (!st0[sp0]) {
-        paren_dec = 0;
         paren = 1;
       }
 
@@ -205,6 +204,7 @@ i32 interpret (ui8* buffer) {
 
       if (st0[sp0]) {
         paren_dec = 2;
+        buffer -= 2;
         paren = -1;
       }
 
