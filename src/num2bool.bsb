@@ -1,0 +1,30 @@
+#
+replace non-zero data with 1
+in: num
+out: bool
+
+11|1l1l'[0"1']0"
+#
+
+  # push input def num #
+i
+
+  # push 0 def ? right #
+11|1l1l'
+
+  # if num neq 0 then #
+[
+    # pop num #
+    # movsp right def num #
+  0"
+
+    # push 1 def ? right #
+  1'
+]
+
+  # pop num #
+  # movsp right def ret_bool #
+0"
+
+  # print ret_bool #
+J0
