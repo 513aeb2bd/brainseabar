@@ -1,0 +1,120 @@
+#
+determine if num1 + num2 + carry generates carry
+in: num1 num2 carry
+out: carry_generated
+
+11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
+#
+
+# get num1, num2, carry #
+  # print "num1 " #
+1Il1lIlIl1lIl1lIl1lIlj I'11|1llI1IlIlIllj 'j '1Il1lIlIlIlIl1lj '1IlIlIlIlIlj '
+
+  # push input def num1 #
+i
+
+  # print "num2 " #
+""1l"""j 0j 0j 0j 0j 0
+
+  # push input def num2 #
+i
+
+  # print "carry " #
+1Il1lIlIlIlIl1lIl1lj 11|1lIllj 1IlIlIlIl1llj j 1IlIlIll11|1llj 01IlIlIlIlIlj 0
+
+  # push input def carry #
+i
+
+# if sum + 1 == 0 (if sum = 255) and carry is set, means carry generated #
+  # push 0 def carry_n right #
+11|1l1l'
+
+  # if carry neq 0 then #
+[
+    # pop carry #
+    # movsp right def carry #
+  0"
+
+    # push 254 (set 7th bit) def carry_n right #
+  11|'
+]
+
+  # pop carry #
+0
+
+  # push num1 def tmp1 #
+  # push num2 def tmp2 #
+I'OI'O""
+
+  # add tmp1 tmp2 def sum #
+  # inc sum def sum_inc #
+l 1l
+
+  # push 0 def ? right #
+11|1l1l'
+
+  # if sum_inc neq 0 then #
+[
+    # pop sum_inc def sum_inc #
+  0"
+  
+    # push 1 def ? right #
+  1'
+]
+
+  # pop sum_inc #
+  # movsp right def sum_inc #
+0"
+
+  # sub sum_inc 1 #
+11|1l l
+
+  # movsp right #
+  # and sum_inc carry_n def res1 right #
+"|I|'
+
+# if 7th bit of num1 and num2 all 1, means carry generated #
+  # push num1 def tmp1 #
+  # push num2 def tmp2 #
+I'OI'O""
+
+  # and tmp1 tmp2 def res2 right #
+|I|'
+
+# if 7th bit of sum is 0, and 7th bit of either of num1 or num2 is 1,
+    means carry generated #
+  # push num1 def tmp1 #
+  # push num2 def tmp2 #
+I'OI'O""
+
+  # add tmp1 tmp2 def tmp #
+  # not tmp def tmp right #
+lI|'
+
+  # or num1 num2 def ornum #
+'I|"I||
+
+  # movsp right #
+  # and ornum tmp def res3 #
+"|I|
+
+  # movesp right, movesp right #
+""
+
+  # or res2 res1 def res2 #
+  # or res3 res2 def res #
+'I|"I|| 'I|"I||
+
+  # push 128 const #
+1IlIlIlIlIlIlIl
+
+  # and res 128 def ret #
+|I|
+
+  # call num2bool.bsb def ret #
+11|1l1l'[0"1']0"
+
+  # print ret #
+J
+  # pop ret #
+0
