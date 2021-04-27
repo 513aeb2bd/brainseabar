@@ -3,10 +3,11 @@ determine if num1 + num2 + carry generates carry
 in: num1 num2 carry
 out: carry_generated
 
-11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
+code:
+11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''
+I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
 #
 
-# get num1, num2, carry #
   # print "num1 " #
 1Il1lIlIl1lIl1lIl1lIlj I'11|1llI1IlIlIllj 'j '1Il1lIlIlIlIl1lj '1IlIlIlIlIlj '
 
