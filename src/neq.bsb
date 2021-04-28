@@ -1,0 +1,23 @@
+#
+determine if num1 != num2
+in: num1 num2
+out: !=
+
+code:
+I|1ll11|1l1l'[0"1']0"
+#
+
+  # push input def num1 #
+  # push input def num2 #
+ii
+
+  # sub num1 num2 def sb #
+I|1l l
+
+  # if num1 != num2 then sb must be non-zero #
+  # call num2bool.bsb def ret_neq #
+11|1l1l'[0"1']0"
+
+  # print ret_neq #
+  # pop ret_neq #
+J0
