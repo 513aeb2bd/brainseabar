@@ -1,0 +1,39 @@
+#
+if num is non-zero then return ret_true, else return ret_false
+in: num ret_true ret_false
+out: ret
+
+code:
+''[II||1l""O'']0"0"
+#
+
+  # push input def num #
+i
+
+  # push input def ret_true #
+i
+
+  # push ingut def ret_false #
+i
+
+  # movsp left, movsp left #
+''
+
+  # if num != 0 then #
+[
+    # xor num num #
+  II||1l
+  
+    # swap ret_true ret_false #
+  ""O''
+]
+
+  # pop num #
+  # movsp right #
+  # pop #
+  # movesp right def ret #
+0 "0"
+
+  # print ret #
+  # pop ret #
+J0
