@@ -80,14 +80,15 @@ int main (ui32 argv, ui8** argc) {
   }
 
   len_file += len_try;
-  buf[len_file - 1] = '\0';
-  
+  buf[len_file] = '\0';
+
   if (!checkSource (buf)) {
-    interpret (buf);
+    if (interpret (buf) < 0) {
+      printf ("\nerror occurred\n");
+    }
   }
 
   free (buf);
-
   return 0;
 }
 
@@ -100,29 +101,40 @@ int main (ui32 argv, ui8** argc) {
 
 
 i32 checkSource (ui8* buf) {
-  i32 paren, comm;
+  i32 num_paren_open, comment_open;
 
-  paren = comm = 0;
+  num_paren_open = comment_open = 0;
 
   for (;;) {
-    if (!*buf) {
+    if (*buf == '\0') {
       break;
     }
 
-    if (!comm) {
-      if (*buf == SYM_PAREN_OPEN) {
-        paren += 1;
-      }
-      else if (*buf == SYM_PAREN_CLOSE) {
-        paren -= 1;
-      }
+    comment_open ^= *buf == SYM_COMMENT;
+    buf += 1;
+
+    if (comment_open) {
+      continue;
     }
 
-    comm ^= *buf == SYM_COMMENT;
-    buf += 1;
+    // do not count paren symbol inside comment
+    if (!comment_open) {
+      if (*buf == SYM_PAREN_OPEN) {
+        num_paren_open += 1;
+      }
+      else if (*buf == SYM_PAREN_CLOSE) {
+        num_paren_open -= 1;
+      }
+
+      // paren_close can not be ahead of paren_open
+      if (num_paren_open < 0) {
+        return -1;
+      }
+    }
   }
 
-  if (paren || comm) {
+  // there must be no paren open or comment open
+  if (num_paren_open || comment_open) {
     return -1;
   }
 
@@ -131,10 +143,23 @@ i32 checkSource (ui8* buf) {
 
 
 
+// MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
+// MNMNMN MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMN
+// MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
+
+
+
 i32 interpret (ui8* buffer) {
   ui8* st0, * st1;
-  ui8 cont, rg0, rg1, comm;
-  ui64 sp0, sp1, siz_st0, siz_st1, paren_dec;
+  ui8 cont, rg0, comment_open;
+  // how much to jump if condition is true
+  // array index is equal to parenthesis id
+  ui64* table_jump;
+  // parenthesis id after jump
+  ui64* table_parenid;
+  // used for making table_jump and table_parenid
+  ui64* stack_addr, * stack_paren;
+  ui64 sp0, sp1, siz_st0, siz_st1;
   i32 ret, paren;
 
 #ifdef DEBUG
@@ -143,10 +168,75 @@ i32 interpret (ui8* buffer) {
 
 #endif
 
-  ret = 0;
+  // count total parentheses
+  paren = sp0 = 0;
+  table_jump = NULL;
+
+  for (;;) {
+    if (buffer[sp0] == '\0') {
+      break;
+    }
+
+    if (!comment_open) {
+      paren += buffer[sp0] == SYM_PAREN_OPEN || buffer[sp0] == SYM_PAREN_CLOSE;
+    }
+
+    comment_open ^= buffer[sp0] == SYM_COMMENT;
+    sp0 += 1;
+  }
+
+  // calculate table_jump and table_parenid
+  if (paren) {
+    table_jump = (ui64*)malloc (paren << 3);
+    table_parenid = (ui64*)malloc (paren << 3);
+    stack_addr = (ui64*)malloc (paren << 2);
+    stack_paren = (ui64*)malloc (paren << 2);
+
+    paren = sp0 = sp1 = 0;
+    comment_open = 0;
+
+    // each parenthesis has own paren_id and paren points the id
+    // sp0 points the address of current operator
+    // sp1 points the top of paren stack
+    for (;;) {
+      if (buffer[sp0] == '\0') {
+        break;
+      }
+
+      if (!comment_open) {
+        if (buffer[sp0] == SYM_PAREN_OPEN) {
+          // push the address of current operator and paren_id
+          stack_addr[sp1] = sp0;
+          stack_paren[sp1] = paren;
+          table_parenid[paren] = paren;
+          sp1 += 1;
+          paren += 1;
+        }
+        else if (buffer[sp0] == SYM_PAREN_CLOSE) {
+          // pop and calculate address difference
+          sp1 -= 1;
+          table_jump[stack_paren[sp1]] = sp0 - stack_addr[sp1];
+          table_jump[paren] = sp0 - stack_addr[sp1];
+          table_parenid[paren] = table_parenid[stack_paren[sp1]];
+          table_parenid[stack_paren[sp1]] = paren;
+          paren += 1;
+        }
+      }
+
+      comment_open ^= buffer[sp0] == SYM_COMMENT;
+      sp0 += 1;
+    }
+
+    free (stack_addr);
+    free (stack_paren);
+  }
+
+  // MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
+
+  // begin interpretation
+  ret = -1;
   paren = 0;
-  comm = 0;
-  paren_dec = 0;
+  comment_open = 0;
 
   siz_st1 = siz_st0 = 64;
   sp1 = sp0 = 0;
@@ -154,42 +244,43 @@ i32 interpret (ui8* buffer) {
   st1 = (ui8*)malloc (siz_st1);
 
   for (;;) {
-    if (!*buffer) {
+    if (*buffer == '\0') {
+      ret = 0;
       break;
     }
 
-    cont = *buffer;
-    buffer += 1;
-    comm ^= cont == SYM_COMMENT;
+    cont = *buffer;    // get current operator
+    buffer += 1;    // point next operator
+    comment_open ^= cont == SYM_COMMENT;    // toggle comment open
 
-    if (comm) {
-      buffer -= paren_dec;
+    if (comment_open || cont == SYM_COMMENT) {
       continue;
     }
-    
-    if (paren) {
-      paren += cont == SYM_PAREN_OPEN;
-      paren -= cont == SYM_PAREN_CLOSE;
 
-      if (paren) {
-        buffer -= paren_dec;
-      }
-      else {
-        paren_dec = 0;
-      }
-
+    // skip whitespaces
+    if (cont == ' ' || cont == '\n' || cont == '\t') {
       continue;
     }
 
     // if the top of st0 is zero, then jump forwards to matching ']'
     if (cont == SYM_PAREN_OPEN) {
       if (!sp0) {
-        ret = -1;
         break;
       }
 
       if (!st0[sp0]) {
-        paren = 1;
+        buffer += table_jump[paren];
+        paren = table_parenid[paren] + 1;
+
+#ifdef DEBUG
+
+        printf ("jumped forward.\n");
+
+#endif
+
+      }
+      else {
+        paren += 1;
       }
 
       continue;
@@ -198,14 +289,22 @@ i32 interpret (ui8* buffer) {
     // if the top of st0 is non-zero, then jump backwards to matching '['
     if (cont == SYM_PAREN_CLOSE) {
       if (!sp0) {
-        ret = -1;
         break;
       }
 
       if (st0[sp0]) {
-        paren_dec = 2;
-        buffer -= 2;
-        paren = -1;
+        buffer -= table_jump[paren];
+        paren = table_parenid[paren] + 1;
+
+#ifdef DEBUG
+
+        printf ("jumped backward.\n");
+
+#endif
+
+      }
+      else {
+        paren += 1;
       }
 
       continue;
@@ -218,14 +317,15 @@ i32 interpret (ui8* buffer) {
     }
     // pop from st0;
     else if (cont == SYM_POP) {
-      if (sp0) {
-        sp0 -= 1;
+      if (!sp0) {
+        break;
       }
+
+      sp0 -= 1;
     }
     // pop from st0 and push to st1
     else if (cont == SYM_MOVETO_ST1) {
       if (!sp0) {
-        ret = -1;
         break;
       }
 
@@ -236,7 +336,6 @@ i32 interpret (ui8* buffer) {
     // pop from st1 and push to st0
     else if (cont == SYM_MOVETO_ST0) {
       if (!sp1) {
-        ret = -1;
         break;
       }
 
@@ -247,7 +346,6 @@ i32 interpret (ui8* buffer) {
     // copy the top of st0 and push to st0
     else if (cont == SYM_COPY) {
       if (!sp0) {
-        ret = -1;
         break;
       }
 
@@ -257,7 +355,6 @@ i32 interpret (ui8* buffer) {
     // exchange the tops of st0 and st1
     else if (cont == SYM_EXCHANGE) {
       if (sp0 < 2) {
-        ret = -1;
         break;
       }
 
@@ -268,7 +365,6 @@ i32 interpret (ui8* buffer) {
     // pop two items of st0 and push arithmetic add of two
     else if (cont == SYM_ADD) {
       if (sp0 < 2) {
-        ret = -1;
         break;
       }
 
@@ -278,7 +374,6 @@ i32 interpret (ui8* buffer) {
     // pop two items of st0 and push logical nand of two
     else if (cont == SYM_NAND) {
       if (sp0 < 2) {
-        ret = -1;
         break;
       }
 
@@ -296,21 +391,20 @@ i32 interpret (ui8* buffer) {
     // print top of st0 in ascii
     else if (cont == SYM_PRINT_ASCII) {
       if (!sp0) {
-        printf (".");
+        break;
       }
-      else {
-        printf ("%c", st0[sp0]);
-      }
+
+      printf ("%c", st0[sp0]);
     }
     // print top of st0 in number
     else if (cont == SYM_PRINT_NUM) {
       if (!sp0) {
-        printf (".");
+        break;
       }
-      else {
-        printf ("%u ", st0[sp0]);
-      }
+
+      printf ("%u ", st0[sp0]);
     }
+    // not an operator
     else {
       continue;
     }
@@ -319,7 +413,6 @@ i32 interpret (ui8* buffer) {
 
     if (siz_st0 - sp0 == 1) {
       if (!(siz_st0 & 0xfffff)) {
-        ret = -1;
         break;
       }
 
@@ -329,7 +422,6 @@ i32 interpret (ui8* buffer) {
 
     if (siz_st1 - sp1 == 1) {
       if (!(siz_st0 & 0xfffff)) {
-        ret = -1;
         break;
       }
 
@@ -379,6 +471,11 @@ i32 interpret (ui8* buffer) {
 
 #endif
 
+  }
+
+  if (table_jump != NULL) {
+    free (table_jump);
+    free (table_parenid);
   }
 
   free (st0);
