@@ -117,19 +117,16 @@ i32 checkSource (ui8* buf) {
       continue;
     }
 
-    // do not count paren symbol inside comment
-    if (!comment_open) {
-      if (*buf == SYM_PAREN_OPEN) {
-        num_paren_open += 1;
-      }
-      else if (*buf == SYM_PAREN_CLOSE) {
-        num_paren_open -= 1;
-      }
+    if (*buf == SYM_PAREN_OPEN) {
+      num_paren_open += 1;
+    }
+    else if (*buf == SYM_PAREN_CLOSE) {
+      num_paren_open -= 1;
+    }
 
-      // paren_close can not be ahead of paren_open
-      if (num_paren_open < 0) {
-        return -1;
-      }
+    // paren_close can not be ahead of paren_open
+    if (num_paren_open < 0) {
+      return -1;
     }
   }
 
