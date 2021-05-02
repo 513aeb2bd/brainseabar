@@ -114,9 +114,9 @@ J  // sp 위치의 값을 number로 출력합니다.
 ### 간단한 예제
 두 수를 입력받고 산술 덧셈 출력하기
 <pre><code>iilJ0</code></pre>
-두 수를 입력받고 논리 합 출력하기
-<pre><code>ii|I|J0</code></pre>
 두 수를 입력받고 논리 곱 출력하기
+<pre><code>ii|I|J0</code></pre>
+두 수를 입력받고 논리 합 출력하기
 <pre><code>ii'I|"I||J0</code></pre>
 숫자 0 출력하기
 <pre><code>11|1l1lJ0</code></pre>
