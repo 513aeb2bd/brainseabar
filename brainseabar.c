@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "bsbmain.h"
 
 
 // MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
@@ -30,15 +31,16 @@
 
 #endif
 
-typedef uint8_t  ui8;
-typedef int32_t  i32;
-typedef uint32_t  ui32;
-typedef uint64_t  ui64;
-
 // MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
 
+// bsbstack.c
+extern struct bsbstack* createBsbstack ();
+extern i32 destroyBsbstack (struct bsbstack* st);
+extern i32 checkBsbstackSize (struct bsbstack* st);
+
+i32 bsbExecute (i8* filename, struct bsbstack* st);
 i32 checkSource (ui8* buffer);
-i32 interpret (ui8* buffer);
+i32 interpret (ui8* buffer, struct bsbstack* st);
 
 
 
@@ -48,44 +50,39 @@ i32 interpret (ui8* buffer);
 
 
 
-int main (ui32 argv, ui8** argc) {
+// execute source code in the file
+// return 0 on success
+i32 bsbExecute (i8* filename, struct bsbstack* st) {
   i32 file;
-  ui64 len_file, len_try;
+  ui64 len_file;
   ui8* buf;
 
-  if (argv == 1) {
-    printf ("error: input file name\n");
-    return 0;
-  }
-
-  file = open (argc[1], O_RDONLY);
+  file = open (filename, O_RDONLY);
 
   if (file < 0) {
     printf ("error: couldn't open file\n");
-    return 0;
+    return -1;
   }
 
-  len_file = 0;
-  buf = (ui8*)malloc (512);
+  // copy source code from file to memory
+  len_file = lseek (file, 0, SEEK_END);
+  lseek (file, 0, SEEK_SET);
+  buf = (ui8*)malloc (len_file + 2);
+  read (file, buf, len_file);
+  buf[len_file + 1] = '\0';
 
-  for (;;) {
-    len_try = read (file, buf + len_file, 512);
-
-    if (len_try < 512) {
-      break;
-    }
-
-    len_file += 512;
-    buf = (ui8*)realloc (buf, len_file + 512);
+  // validate soure code
+  if (checkSource (buf)) {
+    return -1;
   }
 
-  len_file += len_try;
-  buf[len_file] = '\0';
+  // check if bsbstack exists
+  if (st == NULL) {
+    return -1;
+  }
 
-  if (!checkSource (buf)) {
-    if (interpret (buf) < 0) {
-      printf ("\nerror occurred\n");
-    }
+  if (interpret (buf, st)) {
+    printf ("error occurred\n");
   }
 
   free (buf);
@@ -100,6 +97,8 @@ int main (ui32 argv, ui8** argc) {
 
 
 
+// check parenthesis and comment sign match
+// return 0 if no error, -1 if error detected
 i32 checkSource (ui8* buf) {
   i32 num_paren_open, comment_open;
 
@@ -131,11 +130,7 @@ i32 checkSource (ui8* buf) {
   }
 
   // there must be no paren open or comment open
-  if (num_paren_open || comment_open) {
-    return -1;
-  }
-
-  return 0;
+  return -(num_paren_open || comment_open);
 }
 
 
@@ -146,7 +141,7 @@ i32 checkSource (ui8* buf) {
 
 
 
-i32 interpret (ui8* buffer) {
+i32 interpret (ui8* buffer, struct bsbstack* st) {
   ui8* st0, * st1;
   ui8 cont, rg0, comment_open;
   // how much to jump if condition is true
@@ -156,7 +151,7 @@ i32 interpret (ui8* buffer) {
   ui64* table_parenid;
   // used for making table_jump and table_parenid
   ui64* stack_addr, * stack_paren;
-  ui64 sp0, sp1, siz_st0, siz_st1;
+  ui64 sp0, sp1;
   i32 ret, paren;
 
 #ifdef DEBUG
@@ -200,28 +195,37 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      if (!comment_open) {
-        if (buffer[sp0] == SYM_PAREN_OPEN) {
-          // push the address of current operator and paren_id
-          stack_addr[sp1] = sp0;
-          stack_paren[sp1] = paren;
-          table_parenid[paren] = paren;
-          sp1 += 1;
-          paren += 1;
-        }
-        else if (buffer[sp0] == SYM_PAREN_CLOSE) {
-          // pop and calculate address difference
-          sp1 -= 1;
-          table_jump[stack_paren[sp1]] = sp0 - stack_addr[sp1];
-          table_jump[paren] = sp0 - stack_addr[sp1];
-          table_parenid[paren] = table_parenid[stack_paren[sp1]];
-          table_parenid[stack_paren[sp1]] = paren;
-          paren += 1;
-        }
+      cont = buffer[sp0];
+      sp0 += 1;
+      comment_open ^= cont == SYM_COMMENT;
+
+      // skip comment
+      if (comment_open || cont == SYM_COMMENT) {
+        continue;
       }
 
-      comment_open ^= buffer[sp0] == SYM_COMMENT;
-      sp0 += 1;
+      // skip whitespace
+      if (cont == ' ' || cont == '\t' || cont == '\n') {
+        continue;
+      }
+
+      if (cont == SYM_PAREN_OPEN) {
+        // push the address of current operator and paren_id
+        stack_addr[sp1] = sp0;
+        stack_paren[sp1] = paren;
+        table_parenid[paren] = paren;
+        sp1 += 1;
+        paren += 1;
+      }
+      else if (cont == SYM_PAREN_CLOSE) {
+        // pop and calculate address difference
+        sp1 -= 1;
+        table_jump[stack_paren[sp1]] = sp0 - stack_addr[sp1];
+        table_jump[paren] = sp0 - stack_addr[sp1];
+        table_parenid[paren] = table_parenid[stack_paren[sp1]];
+        table_parenid[stack_paren[sp1]] = paren;
+        paren += 1;
+      }
     }
 
     free (stack_addr);
@@ -234,11 +238,11 @@ i32 interpret (ui8* buffer) {
   ret = -1;
   paren = 0;
   comment_open = 0;
-
-  siz_st1 = siz_st0 = 64;
-  sp1 = sp0 = 0;
-  st0 = (ui8*)malloc (siz_st0);
-  st1 = (ui8*)malloc (siz_st1);
+  // get current bsbstack info
+  st0 = st->st0;
+  st1 = st->st1;
+  sp0 = st->sp0;
+  sp1 = st->sp1;
 
   for (;;) {
     if (*buffer == '\0') {
@@ -250,11 +254,23 @@ i32 interpret (ui8* buffer) {
     buffer += 1;    // point next operator
     comment_open ^= cont == SYM_COMMENT;    // toggle comment open
 
+    // skip comment
     if (comment_open || cont == SYM_COMMENT) {
+
+#ifdef DEBUG
+
+      printf ("%c", cont);
+
+      if (!comment_open) {
+        printf ("\n");
+      }
+
+#endif
+
       continue;
     }
 
-    // skip whitespaces
+    // skip whitespace
     if (cont == ' ' || cont == '\n' || cont == '\t') {
       continue;
     }
@@ -265,7 +281,7 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      if (!st0[sp0]) {
+      if (!st0[sp0 - 1]) {
         buffer += table_jump[paren];
         paren = table_parenid[paren] + 1;
 
@@ -289,7 +305,7 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      if (st0[sp0]) {
+      if (st0[sp0 - 1]) {
         buffer -= table_jump[paren];
         paren = table_parenid[paren] + 1;
 
@@ -309,8 +325,8 @@ i32 interpret (ui8* buffer) {
 
     // push 1 to st0
     if (cont == SYM_PUSH1) {
-      sp0 += 1;
       st0[sp0] = 1;
+      sp0 += 1;
     }
     // pop from st0;
     else if (cont == SYM_POP) {
@@ -326,9 +342,9 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      sp1 += 1;
-      st1[sp1] = st0[sp0];
       sp0 -= 1;
+      st1[sp1] = st0[sp0];
+      sp1 += 1;
     }
     // pop from st1 and push to st0
     else if (cont == SYM_MOVETO_ST0) {
@@ -336,9 +352,9 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      sp0 += 1;
-      st0[sp0] = st1[sp1];
       sp1 -= 1;
+      st0[sp0] = st1[sp1];
+      sp0 += 1;
     }
     // copy the top of st0 and push to st0
     else if (cont == SYM_COPY) {
@@ -346,8 +362,8 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      sp0 += 1;
       st0[sp0] = st0[sp0 - 1];
+      sp0 += 1;
     }
     // exchange the tops of st0 and st1
     else if (cont == SYM_EXCHANGE) {
@@ -355,9 +371,9 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      rg0 = st0[sp0];
-      st0[sp0] = st0[sp0 - 1];
-      st0[sp0 - 1] = rg0;
+      rg0 = st0[sp0 - 1];
+      st0[sp0 - 1] = st0[sp0 - 2];
+      st0[sp0 - 2] = rg0;
     }
     // pop two items of st0 and push arithmetic add of two
     else if (cont == SYM_ADD) {
@@ -365,8 +381,8 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      st0[sp0 - 1] += st0[sp0];
       sp0 -= 1;
+      st0[sp0 - 1] += st0[sp0];
     }
     // pop two items of st0 and push logical nand of two
     else if (cont == SYM_NAND) {
@@ -374,16 +390,16 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      st0[sp0 - 1] = ~(st0[sp0 - 1] & st0[sp0]);
       sp0 -= 1;
+      st0[sp0 - 1] = ~(st0[sp0 - 1] & st0[sp0]);
     }
     // input 1 byte and push to st0
     else if (cont == SYM_INPUT) {
       printf (">> ");
       scanf ("%hhd", &rg0);
-      getc (stdin);
-      sp0 += 1;
+      getc (stdin);  // act as fflush
       st0[sp0] = rg0;
+      sp0 += 1;
     }
     // print top of st0 in ascii
     else if (cont == SYM_PRINT_ASCII) {
@@ -391,7 +407,7 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      printf ("%c", st0[sp0]);
+      printf ("%c", st0[sp0 - 1]);
     }
     // print top of st0 in number
     else if (cont == SYM_PRINT_NUM) {
@@ -399,7 +415,7 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      printf ("%u ", st0[sp0]);
+      printf ("%u ", st0[sp0 - 1]);
     }
     // not an operator
     else {
@@ -408,23 +424,10 @@ i32 interpret (ui8* buffer) {
 
     // MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
 
-    if (siz_st0 - sp0 == 1) {
-      if (!(siz_st0 & 0xfffff)) {
-        break;
-      }
-
-      siz_st0 <<= 1;
-      st0 = (ui8*)realloc (st0, siz_st0);
-    }
-
-    if (siz_st1 - sp1 == 1) {
-      if (!(siz_st0 & 0xfffff)) {
-        break;
-      }
-
-      siz_st1 <<= 1;
-      st0 = (ui8*)realloc (st1, siz_st1);
-    }
+    // update bsbstack info
+    st->sp0 = sp0;
+    st->sp1 = sp1;
+    checkBsbstackSize (st);
 
 #ifdef DEBUG
 
@@ -436,14 +439,14 @@ i32 interpret (ui8* buffer) {
         break;
       }
 
-      dsp -= 1;
-
-      if (sp0 <= dsp) {
+      if (sp0 < dsp) {
         printf ("  . ");
       }
       else {
         printf ("%3d ", st0[sp0 - dsp]);
       }
+
+      dsp -= 1;
     }
 
     printf ("| ");
@@ -460,22 +463,20 @@ i32 interpret (ui8* buffer) {
         printf ("  . ");
       }
       else {
-        printf ("%3d ", st1[sp1 + dsp - (STACK_NUM - 1)]);
+        printf ("%3d ", st1[sp1 + dsp - STACK_NUM]);
       }
-    }
+    } // endfor
 
     printf ("|\n");
 
 #endif
 
-  }
+  } // endfor
 
   if (table_jump != NULL) {
     free (table_jump);
     free (table_parenid);
   }
 
-  free (st0);
-  free (st1);
   return ret;
 }
