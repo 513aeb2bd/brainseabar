@@ -1,41 +1,25 @@
-#
-get num1 XOR num2 (bitwise)
-in: num1 num2
-out: bitwise_xor
+# exclusive or
 
-code:
-I'OI'O|I"|O"||
-#
-
-#
-a XOR b
-    = (a OR b) AND (NOT a OR NOT b)
-    = (a OR b) AND (a NAND b)
-    = a AND (a NAND b) OR b AND (a NAND b)
-    = NOT (a NAND (a NAND b)) OR NOT (b NAND (a NAND b))
-    = (a NAND (a NAND b)) NAND (b NAND (a NAND b))
+# a^b
+#    = (a|b)&(~a|~b)
+#    = (a|b)&(a@b)
+#    = (a&(a@b))|(b&(a@b))   # distributivity
+#    = ~(a@(a@b))|~(b@(a@b))
+#    = (a@(a@b))@(b@(a@b))
 #
 
-  # push input def num1 #
-  # push input def num2 #
-ii
+#    :             a, b|        #
+# '  :                a| b      #
+# I  :             a, a| b      #
+# "  :          a, a, b|        #
+# I  :       a, a, b, b|        #
+# '  :          a, a, b| b      #
+# |  :           a, a@b| b      #
+# I  :      a, a@b, a@b| b      #
+# '  :           a, a@b| a@b, b #
+# |  :          a@(a@b)| a@b, b #
+# '' :  a@(a@b), a@b, b|        #
+# |  : a@(a@b), (a@b)@b|        #
+# |  :              a^b|        #
 
-  # push num2 def tmp2 right #
-  # push num1 def tmp1 right #
-I'OI'O
-
-  # bitwise_nand num1 num2 def nand_r #
-|
-
-  # bitwise_nand nand_r tmp1 def nand_1 #
-I"|
-
-  # bitwise_nand nand_r tmp2 def nand_2 #
-O"|
-
-  # bitwise_nand nand_1 nand_2 def ret_xor #
-|
-
-  # print ret_xor #
-  # pop ret_xor #
-J0
+'I"I'|I'|''||

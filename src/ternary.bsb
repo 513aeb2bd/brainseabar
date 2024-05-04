@@ -1,11 +1,11 @@
+# ternary
 #
-if num is non-zero then return ret_true, else return ret_false
-in: num ret_true ret_false
-out: ret
-
-code:
-''[II||1l""O'']0"0"
+# if num is non-zero then return ret_true, else return ret_false
+# in: ret_false, ret_true, num
+# out: ret
 #
+# code:
+# ''[II||1l""O'']0"0"
 
   # push input def num #
 i
@@ -23,7 +23,7 @@ i
 [
     # xor num num #
   II||1l
-  
+
     # swap ret_true ret_false #
   ""O''
 ]

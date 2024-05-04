@@ -1,40 +1,33 @@
+#include "main.h"
+
 #include <stdio.h>
 
-#include "bsbmain.h"
-
-
-// MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
-// MNMNMN MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMN
-
-
 // bsbstack.c
-extern struct bsbstack* createBsbstack ();
-extern int destroyBsbstack (struct bsbstack* st);
+extern struct bsbstack *createBsbstack ();
+extern id destroyBsbstack (struct bsbstack* st);
 // brainseabar.c
-extern int bsbExecute (char* filename, struct bsbstack* st);
+extern id bsbExecute (char *filename, struct bsbstack *st);
 
+// .
 
+// .
 
-// MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
-// MNMNMN MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMNM MNMNMN
-// MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN MNMNMNMN
+id
+main (id argc, char *argv[])
+{
+   struct bsbstack *st;
 
+   if (argc == 1) {
+      printf ("error: input file name\n");
+      return 0;
+   }
 
+   st = createBsbstack ();
 
-int main (int argv, char** argc) {
-  struct bsbstack* st;
+   if (st != NULL) {
+      bsbExecute (argv[1], st);
+      destroyBsbstack (st);
+   }
 
-  if (argv == 1) {
-    printf ("error: input file name\n");
-    return 0;
-  }
-
-  st = createBsbstack ();
-
-  if (st != NULL) {
-    bsbExecute (argc[1], st);
-    destroyBsbstack (st);
-  }
-
-  return 0;
+   return 0;
 }

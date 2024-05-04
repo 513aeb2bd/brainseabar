@@ -1,0 +1,25 @@
+# exchange #
+
+#    :              a, b|      #
+# I  :           a, b, b|      #
+# '' :                 a| b, b #
+# I  :              a, a| b, b #
+# |  :                ~a| b, b #
+# 1  :             ~a, 1| b, b #
+# l  :                -a| b, b #
+# "  :             -a, b| b    #
+# l  :               b-a| b    #
+# II :     b-a, b-a, b-a| b    #
+# |  :       b-a, ~(b-a)| b    #
+# 1  :    b-a, ~(b-a), 1| b    #
+# l  :          b-a, a-b| b    #
+# "  :       b-a, a-b, b|      #
+# l  :            b-a, a|      #
+# I  :         b-a, a, a|      #
+# '  :            b-a, a| a    #
+# l  :                 b| a    #
+# "  :              b, a|      #
+
+ii
+I''I|1l"lII|1l"lI'l"
+J0J0
