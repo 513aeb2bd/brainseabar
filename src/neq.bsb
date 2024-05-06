@@ -1,23 +1,17 @@
-#
-determine if num1 != num2
-in: num1 num2
-out: !=
+# is not equal
 
-code:
-I|1ll11|1l1l'[0"1']0"
-#
+#      #     q, w|
+# *    #  q, w, w|   # negate w, copy
+# |    #    q, ~w|
+# 1    # q, ~w, 1|
+# l    #    q, -w|
+# l    #      q-w|
+# *    #        e|   # isnonzero
 
-  # push input def num1 #
-  # push input def num2 #
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# |1ll
+# 11|1l1l'[0"1']0"   # isnonzero
+
 ii
-
-  # sub num1 num2 def sb #
-I|1l l
-
-  # if num1 != num2 then sb must be non-zero #
-  # call num2bool.bsb def ret_neq #
-11|1l1l'[0"1']0"
-
-  # print ret_neq #
-  # pop ret_neq #
-J0
+'11|1l1l11|1l1l"[''1l"1l"11|1ll]0|1ll11|1l1l'[0"1']0"
+j0

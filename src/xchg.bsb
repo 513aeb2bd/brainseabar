@@ -1,25 +1,30 @@
-# exchange #
+# exchange
 
-#    :              a, b|      #
-# I  :           a, b, b|      #
-# '' :                 a| b, b #
-# I  :              a, a| b, b #
-# |  :                ~a| b, b #
-# 1  :             ~a, 1| b, b #
-# l  :                -a| b, b #
-# "  :             -a, b| b    #
-# l  :               b-a| b    #
-# II :     b-a, b-a, b-a| b    #
-# |  :       b-a, ~(b-a)| b    #
-# 1  :    b-a, ~(b-a), 1| b    #
-# l  :          b-a, a-b| b    #
-# "  :       b-a, a-b, b|      #
-# l  :            b-a, a|      #
-# I  :         b-a, a, a|      #
-# '  :            b-a, a| a    #
-# l  :                 b| a    #
-# "  :              b, a|      #
+#    #         q, w|
+# *  #   q, w, w, w|      # 3 copy
+# |  #     q, w, ~w|
+# 1  #  q, w, ~w, 1|
+# l  #     q, w, -w|
+# '  #         q, w| -w
+# l  #          q+w| -w
+# *  #     q+w, q+w| -w   # copy
+# "  # q+w, q+w, -w|
+# l  #       q+w, q|
+# *  # q+w, q, q, q|      # 3 copy
+# '  #    q+w, q, q| q
+# |  #      q+w, ~q| q
+# 1  #   q+w, ~q, 1| q
+# l  #      q+w, -q| q
+# l  #            w| q
+# "  #         w, q|
+
+# '11|1l1l11|1l1l11|1l1l"['''1l"1l"1l"11|1ll]0   # 3 copy
+# |1l'l
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# "l
+# '11|1l1l11|1l1l11|1l1l"['''1l"1l"1l"11|1ll]0   # 3 copy
+# '|1ll"
 
 ii
-I''I|1l"lII|1l"lI'l"
-J0J0
+'11|1l1l11|1l1l11|1l1l"['''1l"1l"1l"11|1ll]0|1l'l'11|1l1l11|1l1l"[''1l"1l"11|1ll]0"l'11|1l1l11|1l1l11|1l1l"['''1l"1l"1l"11|1ll]0'|1ll"
+j0j0

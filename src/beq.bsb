@@ -1,28 +1,13 @@
-#
-determine if num1 >= num2
-in: num1 num2
-out: >=
+# determine if num1 >= num2
+# in: num1 num2
+# out: >=
 
-code:
-I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI
-|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
-#
+# TODO: must be modified
 
-  # push input def num1 #
-  # push input def num2 #
 ii
+I|1
+# call getcarry
+11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'
+O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
 
-  # rename num1 param_num1 #
-  # bitwise_not num2 def param_num2 #
-I|
-
-  # push 1 def param_carry #
-1
-
-  # call getcarry.bsb def ret_beq #
-11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''
-I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
-
-  # print ret_beq #
-  # pop ret_beq #
 J0

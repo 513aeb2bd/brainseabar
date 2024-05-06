@@ -3,6 +3,8 @@ determine if num1 + num2 + carry generates carry
 in: num1 num2 carry
 out: carry_generated
 
+# TODO: must be modified
+
 code:
 11|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''
 I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"

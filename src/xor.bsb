@@ -1,25 +1,35 @@
 # exclusive or
 
-# a^b
-#    = (a|b)&(~a|~b)
-#    = (a|b)&(a@b)
-#    = (a&(a@b))|(b&(a@b))   # distributivity
-#    = ~(a@(a@b))|~(b@(a@b))
-#    = (a@(a@b))@(b@(a@b))
+# q^w
+#    = (q|w)&(~q|~w)
+#    = (q|w)&(q@w)
+#    = (q&(q@w))|(w&(q@w))   # distributivity
+#    = ~(q@(q@w))|~(w@(q@w))
+#    = (q@(q@w))@(w@(q@w))
 #
 
-#    :             a, b|        #
-# '  :                a| b      #
-# I  :             a, a| b      #
-# "  :          a, a, b|        #
-# I  :       a, a, b, b|        #
-# '  :          a, a, b| b      #
-# |  :           a, a@b| b      #
-# I  :      a, a@b, a@b| b      #
-# '  :           a, a@b| a@b, b #
-# |  :          a@(a@b)| a@b, b #
-# '' :  a@(a@b), a@b, b|        #
-# |  : a@(a@b), (a@b)@b|        #
-# |  :              a^b|        #
+#      #             q, w|
+# '    #                q| w
+# *    #             q, q| w        # copy
+# "    #          q, q, w|
+# *    #       q, q, w, w|          # copy
+# '    #          q, q, w| w
+# |    #           q, q@w| w
+# *    #      q, q@w, q@w| w        # copy
+# '    #           q, q@w| q@w, w
+# |    #          q@(q@w)| q@w, w
+# ""   #  q@(q@w), q@w, w|
+# |    # q@(q@w), (q@w)@w|
+# |    #              q^w|
 
-'I"I'|I'|''||
+# '
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# "
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# '|
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# '|""||
+
+ii
+''11|1l1l11|1l1l"[''1l"1l"11|1ll]0"'11|1l1l11|1l1l"[''1l"1l"11|1ll]0'|'11|1l1l11|1l1l"[''1l"1l"11|1ll]0'|""||
+j0

@@ -1,44 +1,31 @@
-#
-determine if num1 <= num2
-in: num1 num2
-out: <=
+# determine if num1 <= num2
+# in: num1 num2
+# out: <=
 
-code:
-I'OI'O""11|1l1l'I|1ll[0"11|1l']0"1lI|'I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"
-1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIl
-Il|I|11|1l1l'[0"1']0""|1|I|
-#
+# TODO: must be modified
 
-#
-aeq
-    = abo OR eq
-    = NOT beq OR NOT neq
-    = beq NAND neq
-#
+# aeq
+#     = abo OR eq
+#     = NOT beq OR NOT neq
+#     = beq NAND neq
 
-  # push input def num1 #
-  # push input def num2 #
-ii
+ii   # n1, n2|
 
-  # push num1 def param_num1 #
-  # push num2 def param_num2 #
+# push num1 def param_num1
+# push num2 def param_num2
 I'OI'O""
 
-  # call eq.bsb def eq #
+# call eq.bsb def eq
 11|1l1l'I|1ll[0"11|1l']0"1l
 
-  # bitwise_not eq def neq right #
+# bitwise_not eq def neq right
 I| '
 
-  # rename num1 param_num1 #
-  # rename num2 param_num2 #
-  # call beq.bsb def beq #
-I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI
-|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
+# call beq.bsb def beq
+I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'
+OI'O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
 
-  # logical_nand beq neq def ret_aeq #
+# logical_nand beq neq def ret_aeq
 "| 1|I|
 
-  # print ret_aeq #
-  # pop ret_aeq #
 J0

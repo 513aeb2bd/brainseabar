@@ -1,24 +1,15 @@
-#
-determine if num1 < num2
-in: num1 num2
-out: <
+# determine if num1 < num2
+# in: num1 num2
+# out: <
 
-code:
-I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI
-|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"I|1|I|
-#
+# TODO: must be modified
 
-  # push input def num1 #
-  # push input def num2 #
 ii
+# call beq.bsb def beq
+I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'
+OI'O""lI|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
 
-  # call beq.bsb def beq #
-I|111|1l1l'[0"11|']0I'OI'O""l1l11|1l1l'[0"1']0"11|1ll"|I|'I'OI'O""|I|'I'OI'O""lI
-|''I|"I||"|I|""'I|"I||'I|"I||1IlIlIlIlIlIlIl|I|11|1l1l'[0"1']0"
-
-  # logical_not beq def ret_abo #
+# logical_not beq def ret_abo
 I| 1|I|
 
-  # print ret_abo #
-  # pop ret_abo #
 J0

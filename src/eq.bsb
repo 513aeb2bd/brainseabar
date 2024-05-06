@@ -1,41 +1,17 @@
-#
-determine if num1 == num2
-in: num1 num2
-out: ==
+# is equal
 
-code:
-11|1l1l'I|1ll[0"11|1l']0"1l
-#
+#      #     q, w|
+# *    #  q, w, w|   # negate w, copy
+# |    #    q, ~w|
+# 1    # q, ~w, 1|
+# l    #    q, -w|
+# l    #      q-w|
+# *    #        e|   # iszero
 
-  # push input def num1 #
-  # push input def num2 #
+# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
+# |1ll
+# 1'[0"1|1l1l11|1l1l']0"   # iszero
+
 ii
-
-  # push 0 def tmp right #
-11|1l1l'
-
-  # sub num1 num2 def sb #
-I|1l l
-
-  # if num1 == num2 then sb must be 0 #
-
-  # if sb neq 0 then #
-[
-    # pop sb #
-    # movsp right def sb #
-  0"
-
-    # push -1 def tmp right #
-  11|1l'
-]
-
-  # pop sb #
-  # movsp right def ret_eq #
-0"
-
-  # inc ret_eq #
-1l
-
-  # print ret_eq #
-  # pop ret_eq #
-J0
+'11|1l1l11|1l1l"[''1l"1l"11|1ll]0|1ll1'[0"1|1l1l11|1l1l']0"
+j0
