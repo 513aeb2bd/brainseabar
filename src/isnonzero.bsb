@@ -1,26 +1,24 @@
-# isnonzero
+# is nonzero
 
 #      #        q|
-# 11   #  q, 1, 1|   # push 0
-# |    #    q, ~1|
-# 1    # q, ~1, 1|
-# l    #    q, -1|
-# 1    # q, -1, 1|
-# l    #     q, 0|
+# *    #     q, 0|     # pushzero
 # '    #        q| 0
-# [    # REP, until [sp0] is not 0
+# [    # IF nonzero
 #    0    #      | 0
 #    "    #     0|
 #    1    #  0, 1|
 #    '    #     0| 1
-# ]    # ENDREP
-#      #        0| w   # q == 0 -> w = 0, q != 0 -> w = 1
-# 0    #         | w
-# "    #        w|
+# ]    # ENDIF
+#      #        0| ?q
+# 0    #         | ?q
+# "    #       ?q|
 
 # if q != 0, return 1
 # if q == 0, return 0
 
 i
-11|1l1l'[0"1']0"
-J0
+11|1l1l   # pushzero
+'[0"1']0"
+j0
+
+#11|1l1l'[0"1']0"   # isnonzero

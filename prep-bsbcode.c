@@ -5,14 +5,15 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 // #####################################################################
 // #####################################################################
 
-id prep_bsbcode (char *filename, ib **o_inst, ib ***o_paren);
+id prep_bsbcode (char *filename, ib **o_inst, id **o_paren);
 
 static void conv_char2inst (ib *o_inst);
-static id prep_paren (ib *inst, ib **paren);
+static id prep_paren (ib *inst, id *paren);
 
 // .
 
@@ -41,12 +42,12 @@ char *inst_desc[BSB_NINST] = {
    [BSB_INST_MOVETO_ST0 ] = "Move stack pointer right",
    [BSB_INST_COPY       ] = "Push value pointed by stack pointer",
    [BSB_INST_ADD        ] = "Pop 2 items and push their addition",
-   [BSB_INST_NAND       ] = "Pop 2 items and push their NAND",
+   [BSB_INST_NAND       ] = "Pop 2 items and push their bitwise NAND",
    [BSB_INST_INPUT      ] = "Push value from input",
    [BSB_INST_PRINT_ASCII] = "Print",
    [BSB_INST_PAREN_OPEN ] = "Parenthesis open",
    [BSB_INST_PAREN_CLOSE] = "Parenthesis close",
-   [BSB_INST_COMMENT    ] = "Comment start",
+   [BSB_INST_COMMENT    ] = "Comment until end of line",
    [BSB_INST_COMMENT_END] = "",
    [BSB_INST_PRINT_NUM  ] = "Print",
    [BSB_INST_EXCHANGE   ] = "Exchange value with left one",
@@ -64,48 +65,49 @@ struct {
    [BSB_INST_POP        ] = { .dec_st0 = 1, },
    [BSB_INST_MOVETO_ST1 ] = { .inc_st1 = 1, .dec_st0 = 1, },
    [BSB_INST_MOVETO_ST0 ] = { .inc_st0 = 1, .dec_st1 = 1, },
-   [BSB_INST_COPY       ] = { .inc_st0 = 1, .deprec  = 1, },
+   [BSB_INST_COPY       ] = { .inc_st0 = 1, },
    [BSB_INST_ADD        ] = { .dec_st0 = 1, },
    [BSB_INST_NAND       ] = { .dec_st0 = 1, },
    [BSB_INST_INPUT      ] = { .inc_st0 = 1, },
    [BSB_INST_PAREN_OPEN ] = { .parenth = 1, },
    [BSB_INST_PAREN_CLOSE] = { .parenth = 1, },
    [BSB_INST_PRINT_NUM  ] = { .deprec  = 1, },
+   [BSB_INST_EXCHANGE   ] = { .deprec  = 1, },
 };   // endarr: struct @ flag_inst[]
 
 // #####################################################################
 // #####################################################################
 
 id
-prep_bsbcode (char *filename, ib **o_inst, ib ***o_paren)
+prep_bsbcode (char *filename, ib **o_inst, id **o_paren)
 {
-   ib **paren;
+   id *paren;
    ib *inst;
+   struct stat stat_file;
    id fdbsb, filesize;
 
    assert (filename != NULL && o_inst != NULL && o_paren != NULL);
 
    fdbsb = open (filename, O_RDONLY);
-
-   if (fdbsb < 0) {
-      perror (NULL);
-      return 0;
-   }
+   if (fdbsb < 0)  return 0;
 
    // now file opened
 
-   // copy source code from file to memory
-   filesize = lseek (fdbsb, 0, SEEK_END);
-   lseek (fdbsb, 0, SEEK_SET);
+   if (fstat (fdbsb, &stat_file) < 0)  goto ret_error_fstat;
+
+   // now file size is known
+
+   // copy source code to memory
+   filesize = stat_file.st_size;
    inst = malloc ((filesize + 1) * sizeof *inst);
    paren = malloc ((filesize + 1) * sizeof *paren);
 
-   if (inst == NULL || paren == NULL)  goto bran_error_alloc;
+   if (inst == NULL || paren == NULL)  goto ret_error_alloc;
+
+   // now memory allocated
 
    read (fdbsb, inst, filesize);
    inst[filesize] = '\0';
-
-   close (fdbsb);
 
    conv_char2inst (inst);
 
@@ -113,19 +115,25 @@ prep_bsbcode (char *filename, ib **o_inst, ib ***o_paren)
 #if !defined NDEBUG
       printf ("error: wrong parentheses usage\n");
 #endif
-      goto bran_error_alloc;
+      goto ret_error_paren;
    }
 
    // now parentheses correct
+
+   close (fdbsb);
 
    *o_inst = inst;
    *o_paren = paren;
    return 1;
 
-bran_error_alloc:
+ret_error_paren:
+ret_error_alloc:
 
    free (inst);
    free (paren);
+
+ret_error_fstat:
+
    close (fdbsb);
    return 0;
 }   // endfunc: id prep-bsbcode
@@ -170,34 +178,40 @@ conv_char2inst (ib *o_inst)
 
    is_comment = 0;
 
+   // convert ascii instruction to instruction number
+   // exclude comment
+
    for (psrc = pdst = o_inst; *psrc != '\0'; psrc += 1) {
-      // for each instruction
+      // for each instruction character
       codecur = inst_char2code[*(ub *)psrc];
 
       if (codecur == BSB_INST_UNDEF)  continue;
 
       // now instruction defined
 
+      is_comment ^= switch_comment[codecur][is_comment];
+
+      // if comment, do not copy
+
+      if (is_comment ||
+            codecur == BSB_INST_COMMENT_END ||
+            codecur == BSB_INST_COMMENT)
+         continue;
+
+      // now not comment
+
+      *pdst = codecur;   // copy
+      pdst += 1;
+
       if (flag_inst[codecur].deprec) {
          printf ("note: instruction %c (%s) is deprecated\n", *psrc,
                inst_desc[codecur]);
       }
 
-      is_comment ^= switch_comment[codecur][is_comment];
-
-      if (is_comment ||
-            codecur == BSB_INST_COMMENT ||
-            codecur == BSB_INST_COMMENT_END)
-         continue;
-
-      // now not comment
-
-      *pdst = codecur;
-      pdst += 1;
 #if !defined NDEBUG
       printf ("%c", inst_code2char[codecur]);
 #endif
-   }   // endfor: for each instruction
+   }   // endfor: for each instruction character
 
 #if !defined NDEBUG
    printf ("\n");
@@ -217,7 +231,7 @@ static id indi_paren[BSB_NINST] = {
 // .
 
 static id
-prep_paren (ib *inst, ib **paren)
+prep_paren (ib *inst, id *paren)
 {
    iq *idx_parenopen;
    id matchparen, cparen, iparen;
@@ -237,6 +251,8 @@ prep_paren (ib *inst, ib **paren)
       matchparen += indi_paren[*iinst];
       cparen += *iinst == BSB_INST_PAREN_OPEN;
 
+      // matchparen cannot be negative
+      // check paren close before paren open
       if (matchparen < 0)  return 0;
    }   // endfor: for each instruction
 
@@ -250,6 +266,7 @@ prep_paren (ib *inst, ib **paren)
 
    // now allocated
 
+   // set jumping address
    iparen = 0;
    for (ib *iinst = inst; *iinst != BSB_INST_UNDEF; iinst += 1) {
       // for each instruction
@@ -258,19 +275,19 @@ prep_paren (ib *inst, ib **paren)
       // now instruction is paren
 
       if (*iinst == BSB_INST_PAREN_OPEN) {
+         // store index of paren open
          idx_parenopen[iparen] = iinst - inst;
          iparen += 1;
-      }
+      }   // endif: instruction is paren open
       else {
          iparen -= 1;
-         paren[idx_parenopen[iparen]] = iinst;
-         paren[iinst - inst] = inst + idx_parenopen[iparen];
+         paren[idx_parenopen[iparen]] = iinst - inst;
+         paren[iinst - inst] = idx_parenopen[iparen];
 #if !defined NDEBUG
-         printf ("paren pair: %ld[ ]%ld\n",
-               paren[iinst - inst] - inst,
-               paren[idx_parenopen[iparen]] - inst);
+         printf ("paren pair: %d[ ]%d\n",
+               paren[iinst - inst], paren[idx_parenopen[iparen]]);
 #endif
-      }
+      }   // endif: instruction is paren close
    }   // endfor: for each instruction
 
    free (idx_parenopen);

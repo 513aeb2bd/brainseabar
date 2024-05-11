@@ -1,4 +1,4 @@
-# exclusive or
+# bitwise exclusive or
 
 # q^w
 #    = (q|w)&(~q|~w)
@@ -10,26 +10,20 @@
 
 #      #             q, w|
 # '    #                q| w
-# *    #             q, q| w        # copy
+# I    #             q, q| w
 # "    #          q, q, w|
-# *    #       q, q, w, w|          # copy
+# I    #       q, q, w, w|
 # '    #          q, q, w| w
 # |    #           q, q@w| w
-# *    #      q, q@w, q@w| w        # copy
+# I    #      q, q@w, q@w| w
 # '    #           q, q@w| q@w, w
 # |    #          q@(q@w)| q@w, w
 # ""   #  q@(q@w), q@w, w|
 # |    # q@(q@w), (q@w)@w|
 # |    #              q^w|
 
-# '
-# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
-# "
-# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
-# '|
-# '11|1l1l11|1l1l"[''1l"1l"11|1ll]0   # copy
-# '|""||
-
 ii
-''11|1l1l11|1l1l"[''1l"1l"11|1ll]0"'11|1l1l11|1l1l"[''1l"1l"11|1ll]0'|'11|1l1l11|1l1l"[''1l"1l"11|1ll]0'|""||
+'I"I'|I'|""||
 j0
+
+#'I"I'|I'|""||   # bitxor

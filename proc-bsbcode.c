@@ -7,7 +7,7 @@
 // #####################################################################
 // #####################################################################
 
-id proc_bsbcode (ib *inst, ib **paren);
+id proc_bsbcode (ib *inst, id *paren);
 
 // .
 
@@ -25,7 +25,7 @@ extern struct {
 // #####################################################################
 
 id
-proc_bsbcode (ib *inst, ib **paren)
+proc_bsbcode (ib *inst, id *paren)
 {
    ub *bsbst0, *bsbst1;
    id sp0, sp1, lenst0, lenst1;
@@ -119,14 +119,17 @@ proc_bsbcode (ib *inst, ib **paren)
       case BSB_INST_PAREN_OPEN:
          if (bsbst0[sp0 - 1] != 0)  break;
 
-         iinst = paren[iinst - inst];
+         iinst = inst + paren[iinst - inst];
          break;   // endcase: INST-PAREN-OPEN
       case BSB_INST_PAREN_CLOSE:
          if (bsbst0[sp0 - 1] == 0)  break;
 
-         iinst = paren[iinst - inst];
+         iinst = inst + paren[iinst - inst];
          break;   // endcase: INST-PAREN-CLOSE
       case BSB_INST_EXCHANGE:
+         chtarg = bsbst0[sp0 - 1];
+         bsbst0[sp0 - 1] = bsbst0[sp0 - 2];
+         bsbst0[sp0 - 2] = chtarg;
          break;
       default:
          break;

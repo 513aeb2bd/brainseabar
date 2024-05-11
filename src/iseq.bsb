@@ -1,0 +1,17 @@
+# is equal
+
+#      #     q, w|
+# I|1l #    q, -w|   # neg w
+# l    #      q-w|
+# *    #     q==w|   # iszero
+
+# I|1ll
+# 1'[0"1|1l1lI']0"   # iszero
+
+ii
+I|1l   # neg
+l
+1'[0"1|1l1lI']0"   # iszero
+j0
+
+#I|1ll1'[0"1|1l1lI']0"   # iseq

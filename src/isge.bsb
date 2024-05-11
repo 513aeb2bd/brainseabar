@@ -1,0 +1,23 @@
+# is greater than or equal
+
+# signed compare
+
+#      #                 q, w|
+# I|1l #                q, -w|   # neg
+# l    #                  q-w|
+# 11l  #               q-w, 2|   # push 128, 0b10000000
+# IlIl #               q-w, 8|   |
+# IlIl #              q-w, 32|   |
+# IlIl #             q-w, 128|   |
+# |    #            (q-w)@128|
+# I    # (q-w)@128, (q-w)@128|
+# |    #            (q-w)&128|
+# *    #                 q>=w|   # iszero
+
+ii
+I|1l   # neg
+l11lIlIlIlIlIlIl|I|
+1'[0"1|1l1lI']0"   # iszero
+j0
+
+#I|1ll11lIlIlIlIlIlIl|I|1'[0"1|1l1lI']0"   # isge

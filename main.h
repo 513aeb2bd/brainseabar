@@ -7,7 +7,7 @@
 
 #   define STACKSIZE_INIT  64
 #   define STACKSIZE_MAX  0x100000
-#   define BSB_LENSTACK_INIT   64
+#   define BSB_LENSTACK_INIT   32   // 0x000020
 #   define BSB_LENSTACK_MAX    0x100000
 
 #define SYM_ADD           'l'

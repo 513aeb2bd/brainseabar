@@ -1,0 +1,22 @@
+# bitwise or
+
+# q|w =
+#    ~~(q|w) =
+#    ~(~q&~w) =
+#    ~q@~w =
+#    (q@q)@(w@w)
+
+#      #     q, w|
+# '    #        q| w
+# I    #     q, q| w
+# |    #       ~q| w
+# "    #    ~q, w|
+# I    # ~q, w, w|
+# |    #   ~q, ~w|
+# |    #      q+w|
+
+ii
+'I|"I||
+j0
+
+#'I|"I||   # bitor

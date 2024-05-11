@@ -1,0 +1,16 @@
+# bitwise and
+
+# q&w =
+#    ~(q@w) =
+#    (q@w)@(q@w)
+
+#      #     q, w|
+# |    #      q@w|
+# I    # q@w, q@w|
+# |    #      q&w|
+
+ii
+|I|
+j0
+
+#|I|   # bitand
