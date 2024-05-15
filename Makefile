@@ -14,8 +14,8 @@ bsb: $(objects)
 	$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(COBJDIR)/main.o: main.c main.h
-	$(CC) -c -o $@ $(filter %.c,$^) $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 $(COBJDIR)/prep-bsbcode.o: prep-bsbcode.c main.h
-	$(CC) -c -o $@ $(filter %.c,$^) $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 $(COBJDIR)/proc-bsbcode.o: proc-bsbcode.c main.h
-	$(CC) -c -o $@ $(filter %.c,$^) $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)

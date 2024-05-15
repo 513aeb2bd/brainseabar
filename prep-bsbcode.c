@@ -53,14 +53,7 @@ char *inst_desc[BSB_NINST] = {
    [BSB_INST_EXCHANGE   ] = "Exchange value with left one",
 };   // endarr: char *inst-desc[]
 
-struct {
-   ub parenth : 1;   // paren open or close
-   ub inc_st0 : 1;   // increase st0 pointer
-   ub inc_st1 : 1;   // increase st1 pointer
-   ub dec_st0 : 1;   // decrease st0 pointer
-   ub dec_st1 : 1;   // decrease st1 pointer
-   ub deprec  : 1;   // deprecated
-} flag_inst[BSB_NINST] = {
+union inststat flag_inst[BSB_NINST] = {
    [BSB_INST_PUSH1      ] = { .inc_st0 = 1, },
    [BSB_INST_POP        ] = { .dec_st0 = 1, },
    [BSB_INST_MOVETO_ST1 ] = { .inc_st1 = 1, .dec_st0 = 1, },
@@ -73,7 +66,7 @@ struct {
    [BSB_INST_PAREN_CLOSE] = { .parenth = 1, },
    [BSB_INST_PRINT_NUM  ] = { .deprec  = 1, },
    [BSB_INST_EXCHANGE   ] = { .deprec  = 1, },
-};   // endarr: struct @ flag_inst[]
+};   // endarr: union inststat flag_inst[]
 
 // #####################################################################
 // #####################################################################
