@@ -1,7 +1,7 @@
 CC = clang
 LDFLAGS = -s
 LDLIBS =
-CFLAGS = -O2
+CFLAGS = -c -O2
 COBJDIR = ./OBJS
 
 files = \
@@ -14,8 +14,8 @@ bsb: $(objects)
 	$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 $(COBJDIR)/main.o: main.c main.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS)
 $(COBJDIR)/prep-bsbcode.o: prep-bsbcode.c main.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS)
 $(COBJDIR)/proc-bsbcode.o: proc-bsbcode.c main.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS)
