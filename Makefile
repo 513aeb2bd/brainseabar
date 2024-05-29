@@ -11,11 +11,16 @@ files = \
 objects = $(addprefix $(COBJDIR)/,$(files))
 
 bsb: $(objects)
-	$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	@echo $(CC) -o $@ $(COBJDIR)/\*.o $(LDFLAGS) $(LDLIBS)
+	@$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+.PHONY: clean
+clean:
+	rm $(COBJDIR)/*.o
 
 $(COBJDIR)/main.o: main.c main.h
-	$(CC) -o $@ $< $(CFLAGS)
 $(COBJDIR)/prep-bsbcode.o: prep-bsbcode.c main.h
-	$(CC) -o $@ $< $(CFLAGS)
 $(COBJDIR)/proc-bsbcode.o: proc-bsbcode.c main.h
+
+$(objects):
 	$(CC) -o $@ $< $(CFLAGS)
